@@ -1,0 +1,243 @@
+# NGINX
+sudo echo [nginx] 									> /etc/yum.repos.d/nginx.repo
+sudo echo name=nginx repo 								>> /etc/yum.repos.d/nginx.repo
+sudo echo baseurl=http://nginx.org/packages/centos/7/\$basearch/ 			>> /etc/yum.repos.d/nginx.repo
+sudo echo gpgcheck=0 								>> /etc/yum.repos.d/nginx.repo
+sudo echo enabled=1 									>> /etc/yum.repos.d/nginx.repo
+sudo yum update -y
+sudo yum install nginx -y
+sudo systemctl enable nginx
+sudo systemctl start nginx
+
+
+
+
+# Add in nginx.conf
+#  sed -i $(grep -n 'http {' /etc/nginx/nginx.conf | awk -F: '{print $1}')'a\include /etc/nginx/sites-enabled/*.conf;' /etc/nginx/nginx.conf 
+
+sudo mv /etc/nginx/nginx.conf /etc/nginx/nginx.con.old
+
+
+
+sudo echo "user nginx;"												  > /etc/nginx/nginx.conf
+sudo echo "worker_processes auto;" 											>> /etc/nginx/nginx.conf 
+sudo echo "error_log /var/log/nginx/error.log;" 									>> /etc/nginx/nginx.conf 
+sudo echo "pid /run/nginx.pid;" 											>> /etc/nginx/nginx.conf
+sudo echo "include /usr/share/nginx/modules/*.conf;" 								>> /etc/nginx/nginx.conf
+sudo echo "events {" 												>> /etc/nginx/nginx.conf
+sudo echo    "worker_connections 1024;" 										>> /etc/nginx/nginx.conf
+sudo echo "}"  													>> /etc/nginx/nginx.conf
+sudo echo "http {" 													>> /etc/nginx/nginx.conf
+sudo echo "include /etc/nginx/sites-enabled/*.conf;" 								>> /etc/nginx/nginx.conf
+sudo echo    log_format  main  \'\$remote_addr - \$remote_user \[\$time_local\] \"\$request\" \'  			>> /etc/nginx/nginx.conf
+sudo echo \'\$status \$body_bytes_sent \"\$http_referer\" \'  							>> /etc/nginx/nginx.conf
+sudo echo \'\"\$http_user_agent\" \"\$http_x_forwarded_for\"\'\; 	 						>> /etc/nginx/nginx.conf
+sudo echo    "access_log  /var/log/nginx/access.log  main;" 								>> /etc/nginx/nginx.conf
+sudo echo    sendfile            on\; 										>> /etc/nginx/nginx.conf
+sudo echo    tcp_nopush          on\; 										>> /etc/nginx/nginx.conf
+sudo echo    tcp_nodelay         on\; 										>> /etc/nginx/nginx.conf
+sudo echo    keepalive_timeout   65\; 										>> /etc/nginx/nginx.conf
+sudo echo    types_hash_max_size 2048\; 										>> /etc/nginx/nginx.conf
+sudo echo    include             /etc/nginx/mime.types\; 								>> /etc/nginx/nginx.conf
+sudo echo    default_type        application/octet-stream\; 								>> /etc/nginx/nginx.conf
+sudo echo    include /etc/nginx/conf.d/\*\.conf\; 									>> /etc/nginx/nginx.conf
+sudo echo server \{ 													>> /etc/nginx/nginx.conf
+sudo echo        server_name  \_\; 											>> /etc/nginx/nginx.conf
+sudo echo        root         /usr/share/nginx/html\; 								>> /etc/nginx/nginx.conf
+sudo echo        include /etc/nginx/default.d\/\*\.conf\; 								>> /etc/nginx/nginx.conf
+sudo echo        location \/ \{ 											>> /etc/nginx/nginx.conf
+sudo echo        \} 													>> /etc/nginx/nginx.conf
+sudo echo        error_page 404 \/404.html\; 									>> /etc/nginx/nginx.conf
+sudo echo            location \= \/40x\.html \{ 									>> /etc/nginx/nginx.conf
+sudo echo        \} 													>> /etc/nginx/nginx.conf
+sudo echo        error_page 500 502 503 504 \/50x\.html\; 								>> /etc/nginx/nginx.conf
+sudo echo            location \= \/50x\.html \{ 									>> /etc/nginx/nginx.conf
+sudo echo        \} 													>> /etc/nginx/nginx.conf
+sudo echo    \}  													>> /etc/nginx/nginx.conf
+sudo echo \} 													>> /etc/nginx/nginx.conf
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# Config Nginx
+	sudo mkdir /etc/nginx/sites-available
+	sudo mkdir /etc/nginx/sites-enabled
+	sudo mkdir /var/www/logs/
+
+
+sudo echo error_log /var/www/aaa.lala/logs/nginx_aaa.lala_error.log\;    		 > /etc/nginx/sites-available/aaa.conf
+sudo echo access_log  /var/www/aaa.lala/logs/nginx_aaa.lala_access.log\; 		>> /etc/nginx/sites-available/aaa.conf
+
+sudo echo server \{                                                    		>> /etc/nginx/sites-available/aaa.conf
+sudo echo listen       80 default_server\;                             		>> /etc/nginx/sites-available/aaa.conf
+sudo echo server_name site5.com www.site5.com\;                            		>> /etc/nginx/sites-available/aaa.conf
+sudo echo index index.html  index.php\;                   		  		>> /etc/nginx/sites-available/aaa.conf
+sudo echo root /var/www/aaa.lala/\;					 		>> /etc/nginx/sites-available/aaa.conf							  		
+sudo echo \#Pass PHP scripts to PHP-FPM						>> /etc/nginx/sites-available/aaa.conf
+sudo echo location \~ \\.php\$ \{							>> /etc/nginx/sites-available/aaa.conf
+sudo echo fastcgi_index   index.php\;						>> /etc/nginx/sites-available/aaa.conf
+sudo echo error_log  /var/www/aaa.lala/logs/php_aaa_error.log\;			>> /etc/nginx/sites-available/aaa.conf
+sudo echo \# fastcgi_pass    127.0.0.1:9000\;					>> /etc/nginx/sites-available/aaa.conf
+sudo echo fastcgi_pass   unix:/var/run/php-fpm/php-fpm.aaa.sock\;			>> /etc/nginx/sites-available/aaa.conf
+sudo echo include         fastcgi_params\;						>> /etc/nginx/sites-available/aaa.conf
+sudo echo fastcgi_param   SCRIPT_FILENAME    \$document_root\$fastcgi_script_name\;	>> /etc/nginx/sites-available/aaa.conf
+sudo echo fastcgi_param   SCRIPT_NAME        \$fastcgi_script_name\;			>> /etc/nginx/sites-available/aaa.conf
+
+sudo echo \}										>> /etc/nginx/sites-available/aaa.conf
+sudo echo \}										>> /etc/nginx/sites-available/aaa.conf
+
+
+
+
+# link Nginx config
+	sudo ln -s /etc/nginx/sites-available/aaa.conf /etc/nginx/sites-enabled/aaa1.conf
+
+
+
+
+
+
+#PHP-FPM
+sudo yum install epel-release -y
+sudo yum update -y
+sudo rpm -Uvh https://mirror.webtatic.com/yum/el7/webtatic-release.rpm
+sudo yum install php71w-fpm php71 -y
+sudo systemctl enable php-fpm
+sudo systemctl start php-fpm
+
+
+# PHP-FPM config
+
+
+sudo echo [aaa] 									>  /etc/php-fpm.d/aaa.lala.conf
+sudo echo user = aaa 								>> /etc/php-fpm.d/aaa.lala.conf
+sudo echo group = aaa 								>> /etc/php-fpm.d/aaa.lala.conf
+sudo echo listen = /var/run/php-fpm/php-fpm.aaa.sock 				>> /etc/php-fpm.d/aaa.lala.conf
+sudo echo listen.owner = nginx 							>> /etc/php-fpm.d/aaa.lala.conf
+sudo echo listen.group = nginx 							>> /etc/php-fpm.d/aaa.lala.conf
+sudo echo listen.allowed_clients = 127.0.0.1 					>> /etc/php-fpm.d/aaa.lala.conf
+sudo echo pm = dynamic 								>> /etc/php-fpm.d/aaa.lala.conf
+sudo echo pm.max_children = 50 							>> /etc/php-fpm.d/aaa.lala.conf
+sudo echo pm.start_servers = 5 							>> /etc/php-fpm.d/aaa.lala.conf
+sudo echo pm.min_spare_servers = 5 							>> /etc/php-fpm.d/aaa.lala.conf
+sudo echo pm.max_spare_servers = 35 							>> /etc/php-fpm.d/aaa.lala.conf
+sudo echo slowlog = /var/log/php-fpm/www-slow.log 					>> /etc/php-fpm.d/aaa.lala.conf
+sudo echo php_admin_value[error_log] = /var/log/php-fpm/www-error.log 		>> /etc/php-fpm.d/aaa.lala.conf
+sudo echo php_admin_flag[log_errors] = on 						>> /etc/php-fpm.d/aaa.lala.conf
+sudo echo php_value[session.save_handler] = files 					>> /etc/php-fpm.d/aaa.lala.conf
+sudo echo php_value[session.save_path]    = /var/lib/php/session 			>> /etc/php-fpm.d/aaa.lala.conf
+sudo echo php_value[soap.wsdl_cache_dir]  = /var/lib/php/wsdlcache 			>> /etc/php-fpm.d/aaa.lala.conf
+
+
+
+
+
+
+#MARIA_DB
+sudo echo [mariadb] 									> /etc/yum.repos.d/mariadb.repo
+sudo echo name = MariaDB 								>> /etc/yum.repos.d/mariadb.repo
+sudo echo baseurl = http://yum.mariadb.org/10.2/centos7-amd64 			>> /etc/yum.repos.d/mariadb.repo
+sudo echo gpgkey=https://yum.mariadb.org/RPM-GPG-KEY-MariaDB 			>> /etc/yum.repos.d/mariadb.repo
+sudo echo gpgcheck=1 								>> /etc/yum.repos.d/mariadb.repo
+sudo yum update -y
+sudo yum remove epel-release -y
+sudo  yum update -y
+
+sudo yum install -y MariaDB-server MariaDB-client MariaDB-devel MariaDB-shared
+sudo systemctl start mariadb
+sudo systemctl enable mariadb
+
+
+#Create USER, DB, TABLE
+sudo mysql -u root -e "CREATE USER aaa@localhost IDENTIFIED BY '1'"
+sudo mysql -u root -e "CREATE DATABASE IF NOT EXISTS aaa_db"
+sudo mysql -u root -e "grant all privileges on aaa_db.* to aaa@localhost"
+sudo mysql -u aaa -p1 -D aaa_db -e "create table pid_tb (Date varchar(20), Time varchar(20), Process varchar(40) NOT NULL, PID varchar(11) NOT NULL, date_strt varchar(20) NOT NULL, time_strt varchar(20) NOT NULL)"
+
+# PID MYSQL, PHP, NGINX
+
+sudo ps aux | grep sql |  awk '{print $1,$2,$9,$10}' | sed -n 's/mysql/mysql/p' | sed s/^/"`date +%H:%M:%S` "/ | sed s/^/"`date +%d.%m.%Y` "/	 >/var/lib/mysql/aaa_db/pid.txt
+sudo ps aux | grep php | grep process | awk '{print $11,$2,$9,$10}' | sed s/^/"`date +%H:%M:%S` "/ | sed s/^/"`date +%d.%m.%Y` "/ 			>>/var/lib/mysql/aaa_db/pid.txt	
+sudo ps aux | grep nginx | grep process | grep worker | awk '{print $11,$2,$9,$10}' | sed s/^/"`date +%H:%M:%S` "/ | sed s/^/"`date +%d.%m.%Y` "/   	>>/var/lib/mysql/aaa_db/pid.txt
+
+#Add data in DB
+
+sudo mysql -u root -D aaa_db -e "load data infile 'pid.txt' into table pid_tb FIELDS TERMINATED BY ' '" 
+
+#php site
+	sudo mkdir /var/www/
+	sudo mkdir /var/www/aaa.lala/
+         sudo mkdir /var/www/aaa.lala/logs/
+
+## change time zone 
+sudo ln -sf /usr/share/zoneinfo/Europe/Minsk /etc/localtime
+
+
+sudo echo \<\?php  \$output \= shell_exec\(\'date\'\)\;								> /var/www/aaa.lala/index.php 
+sudo echo echo\"\<pre\>\$output\<\/pre\>\"\;  						 			>> /var/www/aaa.lala/index.php 
+sudo echo \$output3 \= shell_exec\(\'hostname\'\)\; echo \"Hostname\: \<pre\>\$output3\<\/pre\>\"\; 			>> /var/www/aaa.lala/index.php
+sudo echo "shell_exec('/bin/bash  /var/www/aaa.lala/updt.sh'); 	"			>> /var/www/aaa.lala/index.php
+sudo echo \$output5 \= shell_exec\(\'cat /var/www/aaa.lala/pid.txt\'\)\; echo \"\<pre\>\$output5\</pre\>\"\;  \?\> 		>> /var/www/aaa.lala/index.php
+
+										
+
+sudo useradd -s /bin/false -M aaa
+sudo chmod -R 755 /var/www/
+sudo chown -R aaa:aaa /var/www/aaa.lala
+
+# Selinux
+sudo sed -i "s/SELINUX=enforcing/SELINUX=disabled/" /etc/selinux/config
+sudo setenforce 0
+
+
+sudo systemctl reload nginx
+sudo systemctl reload php-fpm
+
+
+sudo mkdir /root/backup
+sudo mysqldump -u root aaa_db |gzip > /root/backup/$(date +%y-%m-%d-%H-%M).aaa.lala.gz;
+
+sudo echo "mysqldump -u root aaa_db |gzip > /root/backup/$(date +%y-%m-%d-%H-%M).aaa.lala.gz;" 	 > /root/backup/backup
+sudo echo "find /root/backup/*.gz -mtime +7 -exec rm -rf {} \;" 				>> /root/backup/backup
+sudo chmod 755 /root/backup/backup
+
+
+
+sudo echo "0 8 * * * /root/backup/backup" 							 > /var/spool/cron/root
+sudo echo "0 20 * * * /root/backup/backup"							>> /var/spool/cron/root
+sudo chmod 600 /var/spool/cron/root
+
+
+
+
+
+#Add and Update sql DB after reload page
+
+# PID MYSQL, PHP, NGINX
+sudo echo \#\!/bin/bash > /var/www/aaa.lala/updt.sh
+sudo echo "ps aux | grep sql |  awk '{print \$1,\$2,\$9,\$10}' | sed -n 's/mysql/mysql/p' | sed s/^/\"\`date +%H:%M:%S\` \"/ | sed s/^/\"\`date +%d.%m.%Y\` \"/ >/var/lib/mysql/aaa_db/pid.txt" >> /var/www/aaa.lala/updt.sh
+sudo echo "ps aux | grep php | grep process | awk '{print \$11,\$2,\$9,\$10}' | sed s/^/\"\`date +%H:%M:%S\` \"/ | sed s/^/\"\`date +%d.%m.%Y\` \"/ >>/var/lib/mysql/aaa_db/pid.txt" >> /var/www/aaa.lala/updt.sh	
+sudo echo "ps aux | grep nginx | grep process | grep worker | awk '{print \$11,\$2,\$9,\$10}' | sed s/^/\"\`date +%H:%M:%S\` \"/ | sed s/^/\"\`date +%d.%m.%Y\` \"/ >>/var/lib/mysql/aaa_db/pid.txt " >> /var/www/aaa.lala/updt.sh
+
+sudo echo "ps aux | grep sql |  awk '{print \$1,\$2,\$9,\$10}' | sed -n 's/mysql/mysql/p' | sed s/^/\"\`date +%H:%M:%S\` \"/ | sed s/^/\"\`date +%d.%m.%Y\` \"/ > /var/www/aaa.lala/pid.txt" >> /var/www/aaa.lala/updt.sh
+sudo echo "ps aux | grep php | grep process | awk '{print \$11,\$2,\$9,\$10}' | sed s/^/\"\`date +%H:%M:%S\` \"/ | sed s/^/\"\`date +%d.%m.%Y\` \"/ >> /var/www/aaa.lala/pid.txt" >> /var/www/aaa.lala/updt.sh	
+sudo echo "ps aux | grep nginx | grep process | grep worker | awk '{print \$11,\$2,\$9,\$10}' | sed s/^/\"\`date +%H:%M:%S\` \"/ | sed s/^/\"\`date +%d.%m.%Y\` \"/ >> /var/www/aaa.lala/pid.txt " >> /var/www/aaa.lala/updt.sh
+
+#Add data in DB
+
+sudo echo "mysql -u root -D aaa_db -e \"load data infile 'pid.txt' into table pid_tb FIELDS TERMINATED BY ' '\" " >> /var/www/aaa.lala/updt.sh
+
+sudo chmod 755 /var/www/aaa.lala/updt.sh
+sudo chown aaa:aaa /var/www/aaa.lala/updt.sh
+sudo chown aaa:aaa /var/www/aaa.lala/pid.txt
